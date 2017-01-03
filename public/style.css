@@ -194,7 +194,7 @@ input[type=button]:disabled:active, button:disabled:active {
   flex-direction: column;
   height: 100%;
   position: fixed;
-  right: 5px;
+  right: 7px;
   top: 0;
   width: 25%;
   z-index: 0;
@@ -277,9 +277,23 @@ input[type=button]:disabled:active, button:disabled:active {
   left: 0;
   right: 0;
 
-  border-radius: 12px;
+  background: rgba(200, 200, 200, 0.25);
+}
+
+.foil-card:before {
+  content: '';
+
+  display: block;
+  position: absolute;
+
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 
   background: rgba(200, 200, 200, 0.25);
+  background-image: url('foil.png');
+  background-size: 240px 340px;
 }
 
 .autopick-card:after {

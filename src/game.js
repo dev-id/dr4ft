@@ -122,7 +122,7 @@ module.exports = class Game extends Room {
       numActiveGames: Game.numActiveGames(),
     })
     Game.broadcastRoomInfo()
-    console.log(`there are now ${Game.totalNumPlayers()} total players in ${Game.numGames()} games, ${Game.numActiveGames()} active`)
+    //console.log(`there are now ${Game.totalNumPlayers()} total players in ${Game.numGames()} games, ${Game.numActiveGames()} active`)
   }
 
   static broadcastRoomInfo() {
@@ -330,7 +330,7 @@ module.exports = class Game extends Room {
       p.timerLength = timerLength
     }
 
-    console.log(`game ${this.id} started with ${this.players.length} players and ${this.seats} seats`)
+    console.log(`${this.type} using ${this.format} game ${this.id} started with ${this.players.length} players and ${this.seats} seats`)
     Game.broadcastGameInfo()
     if (addBots)
       while (players.length < this.seats)

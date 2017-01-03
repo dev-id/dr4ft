@@ -25,12 +25,12 @@ let App = {
     isPrivate: false,
     type: 'draft',
     sets: [
-      'EMN',
-      'EMN',
-      'SOI',
-      'EMN',
-      'EMN',
-      'SOI'
+      'KLD',
+      'KLD',
+      'KLD',
+      'KLD',
+      'KLD',
+      'KLD'
     ],
     list: '',
     cards: 15,

@@ -5,7 +5,7 @@ let {STRINGS} = require('../config.server')
 let allSocks = []
 
 function broadcastNumUsers() {
-  console.log(`there are now ${allSocks.length} connected users`)
+  //console.log(`there are now ${allSocks.length} connected users`)
   Sock.broadcast('set', { numUsers: allSocks.length })
 }
 

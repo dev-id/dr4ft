@@ -8,7 +8,7 @@ module.exports = class extends EventEmitter {
     Object.assign(this, {
       isBot: false,
       isConnected: false,
-      isReadyToStart: false,
+      isReadyToStart: true,
       id: sock.id,
       name: sock.name,
       time: 0,

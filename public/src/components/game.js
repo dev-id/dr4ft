@@ -110,10 +110,8 @@ export default React.createClass({
       columns.push(d.th({})) // kick
 
     let playersTable = d.table({ id: 'players' },
-      d.thead({},
-        d.tr({}, ...columns)),
-      d.tbody({},
-        rows))
+      d.tr({}, ...columns),
+      rows)
 
     return d.fieldset({ className: 'fieldset' },
       d.legend({ className: 'legend game-legend' }, 'Players'),
@@ -150,6 +148,7 @@ function row(p, i) {
   let readyCheckbox
     = i === self ? d.input({
         checked: p.isReadyToStart,
+        disabled: true,
         onChange: App._emit('readyToStart'),
         type: 'checkbox',
       })
