@@ -3,7 +3,7 @@ export default {
     "Random Set": "RNG"
   },
   expansion: {
-    "Kaladesh (PARTIAL SPOIL)": "KLD",
+    "Kaladesh": "KLD",
     "Eldritch Moon": "EMN",
     "Shadows Over Innistrad": "SOI",
     "Oath of the Gatewatch": "OGW",

@@ -16,7 +16,7 @@ var Sets = {}
 before()
 
 var types = ['core', 'expansion', 'commander', 'planechase', 'starter', 'un']
-var codes = ['EMA', 'MMA', 'VMA', 'CNS', 'TPR', 'MM2', 'EXP', 'MPS']
+var codes = ['EMA', 'MMA', 'VMA', 'CNS', 'TPR', 'MM2', 'EXP', 'MPS', 'CN2']
 for (var code in raw) {
   var set = raw[code]
   if (types.indexOf(set.type) > -1
@@ -95,10 +95,16 @@ function after() {
       "code": "MPS"
     }
   }
+  //delete above 2 lines, uncomment below after AER release
+  //  },
+  //  "AER": {
+  //    "cards": ["Paradox Engine","Planar Bridge","Arcbound Ravager","Black Vice","Chalice of the Void","Defense Grid","Duplicant","Engineered Explosives","Ensnaring Bridge","Extraplanar Lens","Grindstone","Meekstone","Oblivion Stone","Ornithopter","Sphere of Resistance","Staff of Domination","Sundering Titan","Sword of Body and Mind","Sword of War and Peace","Trinisphere","Vedalken Shackles","Wurmcoil Engine"],
+  //    "code": "MPS"
+  //  }
+  //}
   for (var masterset in masterpiecelist) {
     if (Sets[masterset]['special']) {
       Sets[masterset]['special']['masterpieces'] = []
-      //masterpiecelist[masterset]['cards']
     } else {
       Sets[masterset]['special'] = {
         "masterpieces": []
@@ -108,14 +114,6 @@ function after() {
       }
     }
     var mastercards = masterpiecelist[masterset]['cards']
-    //console.log("mastercards = " + mastercards)
-    for (var mastercard in mastercards) {
-      //console.log("mastercard = " + mastercards[mastercard])
-      if (!Cards[mastercards[mastercard]]['sets'][masterset]) {
-        Cards[mastercards[mastercard]]['sets'][masterset] = Cards[mastercards[mastercard]]['sets'][masterpiecelist[masterset]['code']]
-        //Cards[mastercards[mastercard]]['sets'][masterset]['rarity'] = "special"
-      }
-    }
   }
   var {EMN} = Sets
   EMN.special = {
@@ -284,7 +282,30 @@ function after() {
   }
   alias(FRF.special.fetch, 'FRF')
 
+  // if a card has cards that don't appear in boosters over a certain card #
+  // send them to removeBonusCards with their set code and the highest numbered booster card
+  removeBonusCards("KLD", 264)
+
   Sets.OGW.common.push('wastes')// wastes are twice as common
+}
+
+function removeBonusCards(setCode, maxNumber) {
+  // some sets contain unique cards that aren't in boosters
+  // ex: KLD planeswalker decks have cards numbered > 264 that are not in boosters
+  // setCode is 3 letter set code
+  // maxNumber is the highest number of a main set card
+  var setRaw = raw[setCode].cards
+
+  for (let cardindex in setRaw) {
+    var card = setRaw[cardindex]
+    if (card.number > 264) {
+      for (var rarity of ['common', 'uncommon', 'rare', 'mythic']) {
+        if (Sets[setCode][rarity].indexOf(card.name.toLowerCase()) > -1) {
+          Sets[setCode][rarity].splice(Sets[setCode][rarity].indexOf(card.name.toLowerCase()), 1)
+        }
+      }
+    }
+  }
 }
 
 function alias(arr, code) {
@@ -336,7 +357,10 @@ function doSet(rawSet, code) {
 function doCard(rawCard, cards, code, set) {
   var rarity = rawCard.rarity.split(' ')[0].toLowerCase()
   if (rarity === 'basic')
-    return
+    if (/snow-covered/.test(rawCard.name.toLowerCase()))
+      rarity = 'special'
+    else
+      return
 
   var {name} = rawCard
   if (['double-faced', 'flip'].indexOf(rawCard.layout) > -1

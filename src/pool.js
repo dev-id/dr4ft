@@ -50,9 +50,7 @@ function toPack(code) {
       size = size - 1
     }
   }
-  //remove a common in case of a foil
   size = size - 1
-  console.log("Using common size: " + size)
   var pack = [].concat(
     _.choose(size, common),
     _.choose(3, uncommon),
@@ -145,8 +143,8 @@ function toPack(code) {
   if (special) {
     if (special.masterpieces) {
       if (_.rand(144) == 0) {
-        //console.log("We're putting in a masterpiece, hopefully")
         specialpick = _.choose(1, special.masterpieces)
+        console.log("Masterpiece! " + specialpick)
         pack.push(specialpick)
         masterpiece = specialpick
       }
@@ -158,7 +156,6 @@ function toPack(code) {
   }
   if (special) {
     var specialpick = _.choose(1, special)
-    //console.log("specialpick = " + specialpick)
     pack.push(specialpick)
     if (foilCard) {
       foilCard = specialpick
@@ -182,24 +179,23 @@ function toCards(pool, code, foilCard, masterpiece) {
     var card = Object.assign({}, Cards[cardName])
 
     var {sets} = card
+
     if (isCube)
       [code] = Object.keys(sets)
-    card.code = mws[code] || code
-    card.foil = false
-    if (masterpiece == cardName.toString().toLowerCase()) {
+    if (masterpiece == card.name.toString().toLowerCase()) {
+      card.rarity = 'special'
+      card.foil = true
       if (code == 'BFZ' || code == 'OGW') {
-        card.code = 'EXP'
-        card.foil = true
+        code = 'EXP'
       }
       else if (code == 'KLD') {
-        card.code = 'MPS'
-        card.foil = true
+        code = 'MPS'
       }
       masterpiece = ''
     }
-    var set = sets[code]
-    //card.foil = false
-    if (foilCard == cardName.toString().toLowerCase()) {
+    card.code = mws[code] || code
+    var set = sets[code]    
+    if (foilCard == card.name.toString().toLowerCase()) {
       card.foil = true
       foilCard = ''
     }
@@ -221,7 +217,7 @@ module.exports = function (src, playerCount, isSealed, isChaos) {
         var rnglist = []
         for (var rngcode in Sets)
           //TODO check this against public/src/data.js
-          if (rngcode != 'UNH' && rngcode != 'UGL' && rngcode != 'SOI')
+          if (rngcode != 'UNH' && rngcode != 'UGL')
             rnglist.push(rngcode)
         var rngindex = _.rand(rnglist.length)
         src[i] = rnglist[rngindex]
