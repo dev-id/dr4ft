@@ -75,7 +75,7 @@ function Download() {
 
 export default React.createClass({
   render() {
-    if (App.state.isGameFinished)
+    if (App.state.isGameFinished || App.state.didGameStart)
       return d.div({ className: 'deck-settings' },
         Lands(),
         d.fieldset({ className: 'download-controls fieldset' },

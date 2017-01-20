@@ -15,6 +15,10 @@ module.exports = class extends EventEmitter {
       packs: [],
       autopick_index: -1,
       pool: [],
+      cap: {
+        packs: {}
+      },
+      picks: []
     })
     this.attach(sock)
   }
@@ -82,8 +86,10 @@ module.exports = class extends EventEmitter {
   pick(index) {
     var pack = this.packs.shift()
     var card = pack.splice(index, 1)[0]
-
+    var pickcard = card.name
     this.pool.push(card)
+    this.picks.push(pickcard)
+
     this.send('add', card.name)
 
     var [next] = this.packs
