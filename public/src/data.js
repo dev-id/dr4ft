@@ -3,6 +3,7 @@ export default {
     "Random Set": "RNG"
   },
   expansion: {
+    "Aether Revolt": "AER",
     "Kaladesh": "KLD",
     "Eldritch Moon": "EMN",
     "Shadows Over Innistrad": "SOI",

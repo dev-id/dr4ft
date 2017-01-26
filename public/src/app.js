@@ -22,14 +22,14 @@ let App = {
 
     seats: 8,
     title: '',
-    isPrivate: false,
+    isPrivate: true,
     type: 'draft',
     sets: [
+      'AER',
+      'AER',
       'KLD',
-      'KLD',
-      'KLD',
-      'KLD',
-      'KLD',
+      'AER',
+      'AER',
       'KLD'
     ],
     list: '',

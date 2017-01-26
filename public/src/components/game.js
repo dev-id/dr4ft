@@ -15,6 +15,7 @@ export default React.createClass({
   componentWillMount() {
     App.state.players = []
     App.send('join', this.props.id)
+    App.state.chat = true
   },
   componentDidMount() {
     this.timer = window.setInterval(decrement, 1e3)

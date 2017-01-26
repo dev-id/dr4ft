@@ -32,7 +32,6 @@ function pickFoil(set) {
       return set.rare
   if (rngFoil < 3)
     return set.uncommon
-  //console.log(set)
   return set.common
 }
 
@@ -50,6 +49,7 @@ function toPack(code) {
       size = size - 1
     }
   }
+  //remove a common in case of a foil
   size = size - 1
   var pack = [].concat(
     _.choose(size, common),
@@ -188,7 +188,7 @@ function toCards(pool, code, foilCard, masterpiece) {
       if (code == 'BFZ' || code == 'OGW') {
         code = 'EXP'
       }
-      else if (code == 'KLD') {
+      else if (code == 'KLD' || code == 'AER') {
         code = 'MPS'
       }
       masterpiece = ''

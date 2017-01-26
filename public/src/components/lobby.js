@@ -9,7 +9,7 @@ let d = React.DOM
 
 export default React.createClass({
   componentWillMount() {
-    App.state.chat = true
+    App.state.chat = false
   },
   componentDidMount() {
     App.send('join', 'lobby')
@@ -139,7 +139,7 @@ function Create() {
       'Number of players: ',
       d.select({
         id: 'num-players',
-        valueLink: App.link('seats'),
+        valueLink: App.link('seats')
       }, seats)),
     d.div({},
       RBox('isPrivate', 'Make room private: ')),
