@@ -42,40 +42,32 @@ function toPack(code) {
   if (mythic && !_.rand(8))
     rare = mythic
   //make small sets draftable.
-  if (size < 9 && code != 'SOI' && code != 'EMN')
+  if (size < 10 && code != 'SOI' && code != 'EMN')
     size = 10
-  if (special) {
-    if (special.masterpieces) {
-      size = size - 1
-    }
-  }
-  //remove a common in case of a foil
-  size = size - 1
+
   var pack = [].concat(
-    _.choose(size, common),
     _.choose(3, uncommon),
     _.choose(1, rare)
   )
 
   if (code == 'SOI')
   //http://markrosewater.tumblr.com/post/141794840953/if-the-as-fan-of-double-face-cards-is-1125-that
-    if (_.rand(8) == 0)
+    if (_.rand(8) == 0) {
+      size = size - 1
       if (_.rand(15) < 3)
         pack.push(_.choose(1, special.mythic))
       else
         pack.push(_.choose(1, special.rare))
-    else
-      pack.push(_.choose(1, common))
+    }
   if (code == 'EMN')
-    if (_.rand(8) == 0)
+    if (_.rand(8) == 0) {
+      size = size - 1
       if (_.rand(5) < 1)
         pack.push(_.choose(1, special.mythic))
       else
         pack.push(_.choose(1, special.rare))
-    else
-      pack.push(_.choose(1, common))
-
-
+    }
+  let foilCard = false
   let specialrnd
   switch (code) {
     case 'EMN':
@@ -98,9 +90,11 @@ function toPack(code) {
       break
     case 'MMA':
       special = selectRarity(set)
+      foilCard = true
       break
     case 'MM2':
       special = selectRarity(set)
+      foilCard = true
       break
     case 'VMA':
     //http://www.wizards.com/magic/magazine/article.aspx?x=mtg/daily/arcana/1491
@@ -143,33 +137,31 @@ function toPack(code) {
   if (special) {
     if (special.masterpieces) {
       if (_.rand(144) == 0) {
+        size = size - 1
         specialpick = _.choose(1, special.masterpieces)
+        specialpick = specialpick[0]
         console.log("Masterpiece! " + specialpick)
         pack.push(specialpick)
         masterpiece = specialpick
       }
-      else {
-        pack.push(_.choose(1, common))
-      }
       special = 0
     }
-  }
-  if (special) {
-    var specialpick = _.choose(1, special)
-    pack.push(specialpick)
-    if (foilCard) {
-      foilCard = specialpick
+    else {
+      var specialpick = _.choose(1, special)
+      specialpick = specialpick[0]
+      pack.push(specialpick)
+      if (foilCard) {
+        foilCard = specialpick
+      }
     }
   }
-  var foilCard = ''
-  //insert foil
-  if (_.rand(6) < 1 && !(foilCard)) {
+  if (_.rand(6) < 1 && !(foilCard) && !(masterpiece)) {
+    size = size - 1
     foilCard = _.choose(1, pickFoil(set))
-    pack.push(foilCard)
+    pack.push(foilCard[0])
   }
-  else {
-    pack.push(_.choose(1, common))
-  }
+  pack = _.choose(size, common).concat(pack)
+
   return toCards(pack, code, foilCard, masterpiece)
 }
 
@@ -182,19 +174,21 @@ function toCards(pool, code, foilCard, masterpiece) {
 
     if (isCube)
       [code] = Object.keys(sets)
+
+    card.code = mws[code] || code
+    var set = sets[code]
+
     if (masterpiece == card.name.toString().toLowerCase()) {
       card.rarity = 'special'
       card.foil = true
       if (code == 'BFZ' || code == 'OGW') {
-        code = 'EXP'
+        card.code = 'EXP'
+      } else if (code == 'KLD' || code == 'AER') {
+        card.code = 'MPS'
       }
-      else if (code == 'KLD' || code == 'AER') {
-        code = 'MPS'
-      }
+      set = sets[card.code]
       masterpiece = ''
     }
-    card.code = mws[code] || code
-    var set = sets[code]    
     if (foilCard == card.name.toString().toLowerCase()) {
       card.foil = true
       foilCard = ''
