@@ -64,6 +64,7 @@ module.exports = class Game extends Room {
     this.renew()
     games[gameID] = this
 
+    //console.log(`game ${id} created`)
     Game.broadcastGameInfo()
   }
 
@@ -121,6 +122,7 @@ module.exports = class Game extends Room {
       numActiveGames: Game.numActiveGames(),
     })
     Game.broadcastRoomInfo()
+    //console.log(`there are now ${Game.totalNumPlayers()} total players in ${Game.numGames()} games, ${Game.numActiveGames()} active`)
   }
 
   static broadcastRoomInfo() {
@@ -240,6 +242,7 @@ module.exports = class Game extends Room {
       this.players.forEach(p => p.err(msg))
 
     delete games[this.id]
+    //console.log(`game ${this.id} destroyed`)
     Game.broadcastGameInfo()
 
     this.emit('kill')
@@ -267,6 +270,7 @@ module.exports = class Game extends Room {
         var playercap = {
           "id": p.id,
           "name": p.name,
+          "ip": p.ip,
           "seat": seatnumber,
           "picks": p.cap.packs
         }
@@ -304,6 +308,7 @@ module.exports = class Game extends Room {
         for (var p of this.players) {
             if (!p.isBot) {
               p.cap.packs[this.round] = p.picks
+              //console.log('moving ' + p.name + ' picks ' + p.picks + ' to cap')
               p.picks = []
             }
         }

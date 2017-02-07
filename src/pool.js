@@ -88,6 +88,10 @@ function toPack(code) {
         ? special.gate
         : special.shock
       break
+    case 'EMA':
+      special = selectRarity(set)
+      foilCard = true
+      break
     case 'MMA':
       special = selectRarity(set)
       foilCard = true
@@ -254,3 +258,4 @@ module.exports = function (src, playerCount, isSealed, isChaos) {
   }
   return pools
 }
+
