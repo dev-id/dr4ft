@@ -89,6 +89,8 @@ module.exports = class extends EventEmitter {
     var card = pack.splice(index, 1)[0]
 
     var pickcard = card.name
+    if (card.foil == true)
+      pickcard = '*' + pickcard + '*'
     this.pool.push(card)
     this.picks.push(pickcard)
     this.send('add', card.name)
