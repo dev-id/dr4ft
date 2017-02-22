@@ -38,36 +38,36 @@ function pickFoil(set) {
 function toPack(code) {
   var set = Sets[code]
   var {common, uncommon, rare, mythic, special, size} = set
+
   if (mythic && !_.rand(8))
     rare = mythic
   //make small sets draftable.
-  if (size < 9 && code != 'SOI' && code != 'EMN')
+  if (size < 10 && code != 'SOI' && code != 'EMN')
     size = 10
+
   var pack = [].concat(
-    _.choose(size, common),
     _.choose(3, uncommon),
     _.choose(1, rare)
   )
 
   if (code == 'SOI')
   //http://markrosewater.tumblr.com/post/141794840953/if-the-as-fan-of-double-face-cards-is-1125-that
-    if (_.rand(8) == 0)
+    if (_.rand(8) == 0) {
+      size = size - 1
       if (_.rand(15) < 3)
         pack.push(_.choose(1, special.mythic))
       else
         pack.push(_.choose(1, special.rare))
-    else
-      pack.push(_.choose(1, common))
+    }
   if (code == 'EMN')
-    if (_.rand(8) == 0)
+    if (_.rand(8) == 0) {
+      size = size - 1
       if (_.rand(5) < 1)
         pack.push(_.choose(1, special.mythic))
       else
         pack.push(_.choose(1, special.rare))
-    else
-      pack.push(_.choose(1, common))
-
-
+    }
+  let foilCard = false
   let specialrnd
   switch (code) {
     case 'EMN':
@@ -88,11 +88,17 @@ function toPack(code) {
         ? special.gate
         : special.shock
       break
+    case 'EMA':
+      special = selectRarity(set)
+      foilCard = true
+      break
     case 'MMA':
       special = selectRarity(set)
+      foilCard = true
       break
     case 'MM2':
       special = selectRarity(set)
+      foilCard = true
       break
     case 'VMA':
     //http://www.wizards.com/magic/magazine/article.aspx?x=mtg/daily/arcana/1491
@@ -131,34 +137,63 @@ function toPack(code) {
         special = special.common
       break
   }
-
+  var masterpiece = ''
   if (special) {
-    var specialpick = _.choose(1, special)
-    pack.push(specialpick)
-    if (foilCard) {
-      foilCard = specialpick
+    if (special.masterpieces) {
+      if (_.rand(144) == 0) {
+        size = size - 1
+        specialpick = _.choose(1, special.masterpieces)
+        specialpick = specialpick[0]
+        console.log("Masterpiece! " + specialpick)
+        pack.push(specialpick)
+        masterpiece = specialpick
+      }
+      special = 0
+    }
+    else {
+      var specialpick = _.choose(1, special)
+      specialpick = specialpick[0]
+      pack.push(specialpick)
+      if (foilCard) {
+        foilCard = specialpick
+      }
     }
   }
-  //insert foil
-  if (_.rand(6) < 1 && !(foilCard)) {
-    var foilCard = _.choose(1, pickFoil(set))
-    pack.push(foilCard)
+  if (_.rand(6) < 1 && !(foilCard) && !(masterpiece)) {
+    size = size - 1
+    foilCard = _.choose(1, pickFoil(set))
+    pack.push(foilCard[0])
   }
-  return toCards(pack, code, foilCard)
+  pack = _.choose(size, common).concat(pack)
+
+  return toCards(pack, code, foilCard, masterpiece)
 }
 
-function toCards(pool, code, foilCard) {
+function toCards(pool, code, foilCard, masterpiece) {
   var isCube = !code
   return pool.map(cardName => {
     var card = Object.assign({}, Cards[cardName])
 
     var {sets} = card
+
     if (isCube)
       [code] = Object.keys(sets)
+
     card.code = mws[code] || code
     var set = sets[code]
-    card.foil = false
-    if (foilCard == cardName.toString().toLowerCase()) {
+
+    if (masterpiece == card.name.toString().toLowerCase()) {
+      card.rarity = 'special'
+      card.foil = true
+      if (code == 'BFZ' || code == 'OGW') {
+        card.code = 'EXP'
+      } else if (code == 'KLD' || code == 'AER') {
+        card.code = 'MPS'
+      }
+      set = sets[card.code]
+      masterpiece = ''
+    }
+    if (foilCard == card.name.toString().toLowerCase()) {
       card.foil = true
       foilCard = ''
     }
@@ -180,7 +215,7 @@ module.exports = function (src, playerCount, isSealed, isChaos) {
         var rnglist = []
         for (var rngcode in Sets)
           //TODO check this against public/src/data.js
-          if (rngcode != 'UNH' && rngcode != 'UGL' && rngcode != 'SOI')
+          if (rngcode != 'UNH' && rngcode != 'UGL')
             rnglist.push(rngcode)
         var rngindex = _.rand(rnglist.length)
         src[i] = rnglist[rngindex]
@@ -223,3 +258,4 @@ module.exports = function (src, playerCount, isSealed, isChaos) {
   }
   return pools
 }
+

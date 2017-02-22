@@ -64,7 +64,7 @@ module.exports = class Game extends Room {
     this.renew()
     games[gameID] = this
 
-    console.log(`game ${id} created`)
+    //console.log(`game ${id} created`)
     Game.broadcastGameInfo()
   }
 
@@ -122,7 +122,7 @@ module.exports = class Game extends Room {
       numActiveGames: Game.numActiveGames(),
     })
     Game.broadcastRoomInfo()
-    console.log(`there are now ${Game.totalNumPlayers()} total players in ${Game.numGames()} games, ${Game.numActiveGames()} active`)
+    //console.log(`there are now ${Game.totalNumPlayers()} total players in ${Game.numGames()} games, ${Game.numActiveGames()} active`)
   }
 
   static broadcastRoomInfo() {
@@ -242,13 +242,46 @@ module.exports = class Game extends Room {
       this.players.forEach(p => p.err(msg))
 
     delete games[this.id]
-    console.log(`game ${this.id} destroyed`)
+    //console.log(`game ${this.id} destroyed`)
     Game.broadcastGameInfo()
 
     this.emit('kill')
   }
 
   end() {
+    var humans = 0
+    for (var p of this.players)
+        if (!p.isBot)
+            humans++
+
+    var draftcap = {
+      "gameID": this.id,
+      "players": humans,
+      "type": this.type,
+      "sets": this.sets,
+      "seats": this.seats,
+      "time": Date.now(),
+      "cap": []
+    }
+    var seatnumber = 0
+    for (var p of this.players) {
+      seatnumber++
+      if (!p.isBot) {
+        var playercap = {
+          "id": p.id,
+          "name": p.name,
+          "ip": p.ip,
+          "seat": seatnumber,
+          "picks": p.cap.packs
+        }
+        draftcap.cap.push(playercap)
+      }
+    }
+    var jsonfile = require('jsonfile')
+    var file = './data/cap.json'
+    jsonfile.writeFile(file, draftcap, {flag: 'a'}, function (err) {
+      if (err) console.error(err)})
+
     this.renew()
     this.round = -1
     this.meta({ round: -1 })
@@ -271,6 +304,15 @@ module.exports = class Game extends Room {
   }
 
   startRound() {
+    if (this.round != 0) {
+        for (var p of this.players) {
+            if (!p.isBot) {
+              p.cap.packs[this.round] = p.picks
+              //console.log('moving ' + p.name + ' picks ' + p.picks + ' to cap')
+              p.picks = []
+            }
+        }
+    }
     if (this.round++ === this.rounds)
       return this.end()
 
@@ -319,18 +361,23 @@ module.exports = class Game extends Room {
         p.send('pool', p.pool)
         p.send('set', { round: -1 })
       }
+      console.log(`${this.type} using ${this.format} game ${this.id} started with ${this.players.length} players`)
       Game.broadcastGameInfo()
       return
     }
 
     timerLength = parseInt(timerLength, 10)
-    useTimer = !Number.isNaN(timerLength) && (timerLength > 0) && useTimer
+
+    //quick fix so 0 second timer works
+    timerLength = timerLength + 1
+
+    //useTimer = !Number.isNaN(timerLength) && (timerLength > 0) && useTimer
     for (p of players) {
       p.useTimer = useTimer
       p.timerLength = timerLength
     }
 
-    console.log(`game ${this.id} started with ${this.players.length} players and ${this.seats} seats`)
+    console.log(`${this.type} using ${this.format} game ${this.id} started with ${this.players.length} players and ${this.seats} seats`)
     Game.broadcastGameInfo()
     if (addBots)
       while (players.length < this.seats)

@@ -22,15 +22,15 @@ let App = {
 
     seats: 8,
     title: '',
-    isPrivate: false,
+    isPrivate: true,
     type: 'draft',
     sets: [
-      'EMN',
-      'EMN',
-      'SOI',
-      'EMN',
-      'EMN',
-      'SOI'
+      'AER',
+      'AER',
+      'KLD',
+      'AER',
+      'AER',
+      'KLD'
     ],
     list: '',
     cards: 15,
@@ -38,7 +38,7 @@ let App = {
 
     addBots: true,
     useTimer: true,
-    timerLength: 40, // seconds
+    timerLength: 0, // seconds
 
     beep: false,
     chat: true,

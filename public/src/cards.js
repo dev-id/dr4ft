@@ -104,7 +104,8 @@ let events = {
     for (let card of cards) {
       let {name} = card
       Cards[name] = card
-      pack[name] = 1
+      pack[name] || (pack[name] = 0)
+      pack[name]++
     }
     App.update()
     if (App.state.beep)

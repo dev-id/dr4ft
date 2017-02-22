@@ -15,6 +15,7 @@ export default React.createClass({
   componentWillMount() {
     App.state.players = []
     App.send('join', this.props.id)
+    App.state.chat = true
   },
   componentDidMount() {
     this.timer = window.setInterval(decrement, 1e3)
@@ -65,7 +66,7 @@ export default React.createClass({
         d.span({ style: { marginLeft: '5px' } },
           `Waiting for ${numNotReady} ${players} to become ready...`)
     }
-
+    let timers = [60,50,40,30,20,10,0].map(x => d.option({}, x))
     let startControls = d.div({},
       d.div({}, `Format: ${App.state.format}`),
       LBox('addBots', 'bots'),
@@ -74,17 +75,12 @@ export default React.createClass({
           d.input({
             type: 'checkbox',
             checkedLink: App.link('useTimer'),
-          }), ' use '),
-        d.label({},
-          d.input({
-            className: 'number',
-            disabled: !App.state.useTimer,
-            min: 0,
-            max: 60,
-            step: 5,
-            type: 'number',
-            valueLink: App.link('timerLength'),
-          }), '-second timer')),
+          }), ' timed - add '),
+          d.label({},
+            d.select({
+              disabled: !App.state.useTimer,
+              valueLink: App.link('timerLength')
+            }, timers), ' extra seconds per pick')),
       d.div({}, startButton, readyReminderText))
 
     return d.fieldset({ className: 'start-controls fieldset' },
@@ -136,13 +132,9 @@ function row(p, i) {
         className: 'icon-bot',
         title: 'This player is a bot.',
       })
-    : p.isConnected ? d.span({
-        className: 'icon-connected',
-        title: 'This player is currently connected to the server.',
-      })
     : d.span({
-        className: 'icon-disconnected',
-        title: 'This player is currently disconnected from the server.',
+        className: 'icon-connected',
+        title: '',
       })
 
   let readyCheckbox

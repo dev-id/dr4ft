@@ -10,11 +10,16 @@ module.exports = class extends EventEmitter {
       isConnected: false,
       isReadyToStart: true,
       id: sock.id,
+      ip: sock.ip,
       name: sock.name,
       time: 0,
       packs: [],
       autopick_index: -1,
       pool: [],
+      cap: {
+        packs: {}
+      },
+      picks: []
     })
     this.attach(sock)
   }
@@ -75,7 +80,18 @@ module.exports = class extends EventEmitter {
       return this.pick(0)
 
     if (this.useTimer)
-      this.time = this.timerLength + pack.length
+      //this.time = this.timerLength + pack.length
+      // http://www.wizards.com/contentresources/wizards/wpn/main/documents/magic_the_gathering_tournament_rules_pdf1.pdf pp43
+      // official WOTC timings are
+      // pick #, time in seconds)
+      //(1,40)(2,40)(3,35)(4,30)(5,25)(6,25)(7,20)(8,20)(9,15)(10,10)(11,10)(12,5)(13,5)(14,5)(15,0)
+      var officialTimes = [40,40,35,30,25,25,20,20,15,10,10,5,5,5]
+      if (pack.length + this.picks.length > 14) {
+        for (var x = 0; x < ((pack.length + this.picks.length) - 14); x++) {
+          officialTimes.splice(6, 0, 20)
+        }
+      }
+      this.time = (this.timerLength - 1) + officialTimes[this.picks.length]
 
     this.send('pack', pack)
   }
@@ -83,7 +99,12 @@ module.exports = class extends EventEmitter {
     var pack = this.packs.shift()
     var card = pack.splice(index, 1)[0]
 
+    var pickcard = card.name
+    if (card.foil == true)
+      pickcard = '*' + pickcard + '*'
+
     this.pool.push(card)
+    this.picks.push(pickcard)
     this.send('add', card.name)
 
     var [next] = this.packs
