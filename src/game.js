@@ -366,12 +366,6 @@ module.exports = class Game extends Room {
       return
     }
 
-    timerLength = parseInt(timerLength, 10)
-
-    //quick fix so 0 second timer works
-    timerLength = timerLength + 1
-
-    //useTimer = !Number.isNaN(timerLength) && (timerLength > 0) && useTimer
     for (p of players) {
       p.useTimer = useTimer
       p.timerLength = timerLength

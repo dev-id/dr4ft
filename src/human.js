@@ -80,18 +80,26 @@ module.exports = class extends EventEmitter {
       return this.pick(0)
 
     if (this.useTimer)
+      var timer = []
       //this.time = this.timerLength + pack.length
       // http://www.wizards.com/contentresources/wizards/wpn/main/documents/magic_the_gathering_tournament_rules_pdf1.pdf pp43
       // official WOTC timings are
       // pick #, time in seconds)
       //(1,40)(2,40)(3,35)(4,30)(5,25)(6,25)(7,20)(8,20)(9,15)(10,10)(11,10)(12,5)(13,5)(14,5)(15,0)
-      var officialTimes = [40,40,35,30,25,25,20,20,15,10,10,5,5,5]
-      if (pack.length + this.picks.length > 14) {
-        for (var x = 0; x < ((pack.length + this.picks.length) - 14); x++) {
-          officialTimes.splice(6, 0, 20)
+      var MTRTimes = [40,40,35,30,25,25,20,20,15,10,10,5,5,5,5]
+      // whereas MTGO starts @ 75s and decrements by 5s per pick
+      var MTGOTimes = [75,70,65,60,55,50,45,40,35,30,25,20,15,10,5]
+      timer = MTGOTimes
+      if (this.timerLength == 'Fast') {
+        timer = MTRTimes
+      }
+      // if a pack has more than 15 cards in it, insert 40s in the middle of the timer for each card > 15
+      if (pack.length + this.picks.length > 15) {
+        for (var x = 15; x < (pack.length + this.picks.length); x++) {
+          timer.splice((timer.length / 2), 0, 40)
         }
       }
-      this.time = (this.timerLength - 1) + officialTimes[this.picks.length]
+      this.time = timer[this.picks.length]
 
     this.send('pack', pack)
   }

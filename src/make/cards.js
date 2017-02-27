@@ -16,7 +16,7 @@ var Sets = {}
 before()
 
 var types = ['core', 'expansion', 'commander', 'planechase', 'starter', 'un']
-var codes = ['EMA', 'MMA', 'VMA', 'CNS', 'TPR', 'MM2']
+var codes = ['EMA', 'MMA', 'VMA', 'CNS', 'TPR', 'MM2', 'EXP', 'MPS', 'CN2']
 for (var code in raw) {
   var set = raw[code]
   if (types.indexOf(set.type) > -1
@@ -34,6 +34,12 @@ function before() {
 
   raw.TSP.cards = raw.TSP.cards.concat(raw.TSB.cards)
   delete raw.TSB
+
+  raw.CPK.cards = raw.CPK.cards.concat(raw.CPK.cards)
+  delete raw.CPK
+
+  raw.ITP.cards = raw.ITP.cards.concat(raw.ITP.cards)
+  delete raw.ITP
 
   raw.PLC.booster = Array(11).fill('common')
   raw.FUT.booster = Array(11).fill('common')
@@ -75,11 +81,52 @@ function before() {
   // appear in Magic 2015 booster packs.
   raw.M15.cards = raw.M15.cards.filter(x => parseInt(x.number) < 270)
   raw.ORI.cards = raw.ORI.cards.filter(x => parseInt(x.number) < 273)
+  //raw.KLD.cards = raw.KLD.cards.filter(x => parseInt(x.number) < 265)
 
   raw.OGW.cards.find(x => x.name === 'Wastes').rarity = 'Common'
 }
 
 function after() {
+  var masterpiecelist = {
+    "BFZ": {
+      "cards": ["prairie stream","sunken hollow","smoldering marsh","cinder glade","canopy vista","hallowed fountain","watery grave","blood crypt","stomping ground","temple garden","godless shrine","steam vents","overgrown tomb","sacred foundry","breeding pool","flooded strand","polluted delta","bloodstained mire","wooded foothills","windswept heath","marsh flats","scalding tarn","verdant catacombs","arid mesa","misty rainforest"],
+      "code": "EXP"
+    },
+    "OGW": {
+      "cards": ["mystic gate","sunken ruins","graven cairns","fire-lit thicket","wooded bastion","fetid heath","cascade bluffs","twilight mire","rugged prairie","flooded grove","ancient tomb","dust bowl","eye of ugin","forbidden orchard","horizon canopy","kor haven","mana confluence","strip mine","tectonic edge","wasteland"],
+      "code": "EXP"
+    },
+    "KLD": {
+      "cards": ['cataclysmic gearhulk', 'torrential gearhulk', 'noxious gearhulk', 'combustible gearhulk', 'verdurous gearhulk', 'aether vial', "champion's helm", 'chromatic lantern', 'chrome mox', 'cloudstone curio', 'crucible of worlds', 'gauntlet of power', 'hangarback walker', 'lightning greaves', 'lotus petal', 'mana crypt', 'mana vault', "mind's eye", 'mox opal', "painter's servant", 'rings of brighthearth', 'scroll rack', 'sculpting steel', 'sol ring', 'solemn simulacrum', 'static orb', 'steel overseer', 'sword of feast and famine', 'sword of fire and ice', 'sword of light and shadow'],
+      "code": "MPS"
+    },
+    "AER": {
+      "cards": ["Paradox Engine","Planar Bridge","Arcbound Ravager","Black Vise","Chalice of the Void","Defense Grid","Duplicant","Engineered Explosives","Ensnaring Bridge","Extraplanar Lens","Grindstone","Meekstone","Oblivion Stone","Ornithopter","Sphere of Resistance","Staff of Domination","Sundering Titan","Sword of Body and Mind","Sword of War and Peace","Trinisphere","Vedalken Shackles","Wurmcoil Engine"],
+      "code": "MPS"
+    }
+  }
+  for (var masterset in masterpiecelist) {
+    if (Sets[masterset]['special']) {
+      Sets[masterset]['special']['masterpieces'] = []
+      //masterpiecelist[masterset]['cards']
+    } else {
+      Sets[masterset]['special'] = {
+        "masterpieces": []
+      }
+      for (var mpindex in masterpiecelist[masterset]['cards']) {
+        Sets[masterset]['special']['masterpieces'].push(masterpiecelist[masterset]['cards'][mpindex].toLowerCase())
+      }
+    }
+    var mastercards = masterpiecelist[masterset]['cards']
+    //console.log("mastercards = " + mastercards)
+    //for (var mastercard in mastercards) {
+      //console.log("mastercard = " + mastercards[mastercard])
+      //if (!Cards[mastercards[mastercard]]['sets'][masterset]) {
+        //Cards[mastercards[mastercard]]['sets'][masterset] = Cards[mastercards[mastercard]]['sets'][masterpiecelist[masterset]['code']]
+        //Cards[mastercards[mastercard]]['sets'][masterset]['rarity'] = "special"
+      //}
+    //}
+  }
   var {EMN} = Sets
   EMN.special = {
     "mythic":[
@@ -247,7 +294,45 @@ function after() {
   }
   alias(FRF.special.fetch, 'FRF')
 
+  /* this got moved to removeBonusCards function
+  var KLDRaw = raw.KLD.cards
+  var {KLD} = Sets
+  for (let cardindex in KLDRaw) {
+    card = KLDRaw[cardindex]
+    if (card.number > 264) {
+      for (var rarity of ['common', 'uncommon', 'rare', 'mythic']) {
+        if (KLD[rarity].indexOf(card.name.toLowerCase()) > -1) {
+          KLD[rarity].splice(KLD[rarity].indexOf(card.name.toLowerCase()), 1)
+        }
+      }
+    }
+  }*/
+
+  // if a card has cards that don't appear in boosters over a certain card #
+  // send them to removeBonusCards with their set code and the highest numbered booster card
+  removeBonusCards("KLD", 264)
+  removeBonusCards("AER", 184)
+
   Sets.OGW.common.push('wastes')// wastes are twice as common
+}
+
+function removeBonusCards(setCode, maxNumber) {
+  // some sets contain unique cards that aren't in boosters
+  // ex: KLD planeswalker decks have cards numbered > 264 that are not in boosters
+  // setCode is 3 letter set code
+  // maxNumber is the highest number of a main set card
+  var setRaw = raw[setCode].cards
+  //var {setCode} = Sets
+  for (let cardindex in setRaw) {
+    var card = setRaw[cardindex]
+    if (card.number > maxNumber) {
+      for (var rarity of ['common', 'uncommon', 'rare', 'mythic']) {
+        if (Sets[setCode][rarity].indexOf(card.name.toLowerCase()) > -1) {
+          Sets[setCode][rarity].splice(Sets[setCode][rarity].indexOf(card.name.toLowerCase()), 1)
+        }
+      }
+    }
+  }
 }
 
 function alias(arr, code) {
@@ -299,7 +384,10 @@ function doSet(rawSet, code) {
 function doCard(rawCard, cards, code, set) {
   var rarity = rawCard.rarity.split(' ')[0].toLowerCase()
   if (rarity === 'basic')
-    return
+    if (/snow-covered/.test(rawCard.name.toLowerCase()))
+      rarity = 'special'
+    else
+      return
 
   var {name} = rawCard
   if (['double-faced', 'flip'].indexOf(rawCard.layout) > -1
@@ -326,6 +414,8 @@ function doCard(rawCard, cards, code, set) {
     colors.length > 1 ? 'multicolor' :
     colors[0].toLowerCase()
 
+  var picUrl = rawCard.url || `http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=${rawCard.multiverseid}&type=card`
+
   cards[name] = { color, name,
     type: rawCard.types[rawCard.types.length - 1],
     cmc: rawCard.cmc || 0,
@@ -333,7 +423,7 @@ function doCard(rawCard, cards, code, set) {
     manaCost: rawCard.manaCost || '',
     sets: {
       [code]: { rarity,
-        url: `http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid=${rawCard.multiverseid}&type=card`
+        url: picUrl
       }
     }
   }

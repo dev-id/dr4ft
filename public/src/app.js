@@ -38,7 +38,7 @@ let App = {
 
     addBots: true,
     useTimer: true,
-    timerLength: 0, // seconds
+    timerLength: 'Default', // seconds
 
     beep: false,
     chat: true,

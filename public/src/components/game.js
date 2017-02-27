@@ -66,7 +66,7 @@ export default React.createClass({
         d.span({ style: { marginLeft: '5px' } },
           `Waiting for ${numNotReady} ${players} to become ready...`)
     }
-    let timers = [60,50,40,30,20,10,0].map(x => d.option({}, x))
+    let timers = ['Fast','Default'].map(x => d.option({}, x))
     let startControls = d.div({},
       d.div({}, `Format: ${App.state.format}`),
       LBox('addBots', 'bots'),
@@ -75,12 +75,12 @@ export default React.createClass({
           d.input({
             type: 'checkbox',
             checkedLink: App.link('useTimer'),
-          }), ' timed - add '),
+          }), ' timer: '),
           d.label({},
             d.select({
               disabled: !App.state.useTimer,
               valueLink: App.link('timerLength')
-            }, timers), ' extra seconds per pick')),
+            }, timers),'')),
       d.div({}, startButton, readyReminderText))
 
     return d.fieldset({ className: 'start-controls fieldset' },

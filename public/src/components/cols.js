@@ -47,7 +47,7 @@ export default React.createClass({
 
       sum += items.length
       cols.push(d.div({ className: 'col' },
-        d.div({}, `${items.length} - ${key}`),
+        d.div({}, `${key} - ${items.length} cards`),
         items))
     }
 
